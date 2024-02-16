@@ -26,14 +26,19 @@ export default function Home() {
             </SignInButton>
           )}
           {!!user.isSignedIn && (
-            <SignOutButton>
-              <button>Sign out with Clerk</button>
-            </SignOutButton>
+            <>
+              <SignOutButton>
+                <button>Sign out with Clerk</button>
+              </SignOutButton>
+              <div>
+                {datas.data?.map((val) => (
+                  <div key={val.id}>{val.name}</div>
+                ))}
+              </div>
+            </>
           )}
         </div>
-        <div>
-          {datas.data?.map((val) => <div key={val.id}>{val.content}</div>)}
-        </div>
+
         <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
       </main>
     </>
