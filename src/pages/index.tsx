@@ -8,13 +8,14 @@ import { SignInButton, useUser } from "@clerk/nextjs";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
+import LoadSpinner from "~/components/LoadSpinner";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
 
-  console.log(user);
+  // console.log(user);
 
   if (!user) return null;
 
@@ -61,14 +62,30 @@ const PostItem = ({ post, author }: PostWithUserT) => {
   );
 };
 
-export default function Home() {
-  const user = useUser();
+const Posts = () => {
+  const { data, isLoading: postIsLoading } = api.post.getAll.useQuery();
 
-  const { data, isLoading } = api.post.getAll.useQuery();
-
-  if (isLoading) return <div>Loading</div>;
+  if (postIsLoading) return <LoadSpinner />;
 
   if (!data) return <div>Something wrong</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data?.map((postData) => (
+        <PostItem {...postData} key={postData.post.id} />
+      ))}
+    </div>
+  );
+};
+
+export default function Home() {
+  const { isLoaded: userIsLoaded, isSignedIn } = useUser();
+
+  // Start fetch (use the cache)
+  api.post.getAll.useQuery();
+
+  // Return empty div if user not loaded
+  if (!userIsLoaded) return <div />;
 
   return (
     <>
@@ -80,12 +97,12 @@ export default function Home() {
       <main className="flex min-h-screen justify-center">
         <div className="w-full border-x border-slate-400 md:max-w-2xl">
           <div className="flex justify-center border-b border-slate-400 p-4">
-            {!user.isSignedIn && (
+            {!isSignedIn && (
               <SignInButton>
                 <button>Sign in with Clerk</button>
               </SignInButton>
             )}
-            {!!user.isSignedIn && (
+            {!!isSignedIn && (
               <>
                 <CreatePostWizard />
                 {/* <SignOutButton>
@@ -95,11 +112,7 @@ export default function Home() {
             )}
           </div>
           <div>
-            <div className="flex flex-col">
-              {data?.map((postData) => (
-                <PostItem {...postData} key={postData.post.id} />
-              ))}
-            </div>
+            <Posts />
           </div>
         </div>
       </main>
