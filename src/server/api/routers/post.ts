@@ -31,8 +31,11 @@ export const postRouter = createTRPCRouter({
   create: privateProcedure
     .input(
       z.object({
-        userName: z.string().min(1).max(50),
-        content: z.string().min(1).max(255),
+        userName: z.string(),
+        content: z
+          .string()
+          .min(1, "Input minimum 1 thingy")
+          .max(255, "Max only 255 Character"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
