@@ -3,7 +3,11 @@ import type { User } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 
 const filterUserClient = (user: User) => {
   return {
@@ -14,17 +18,21 @@ const filterUserClient = (user: User) => {
 };
 
 export const postRouter = createTRPCRouter({
-  create: publicProcedure
-    .input(z.object({ name: z.string().min(1) }))
+  create: privateProcedure
+    .input(
+      z.object({
+        userName: z.string().min(1).max(50),
+        content: z.string().min(1).max(255),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const authorId = ctx.userId;
 
-      return ctx.db.post.create({
+      return await ctx.db.post.create({
         data: {
-          name: input.name,
-          content: "abc",
-          authorId: "123",
+          name: input.userName,
+          authorId,
+          content: input.content,
         },
       });
     }),
@@ -38,6 +46,7 @@ export const postRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.post.findMany({
       take: 100,
+      orderBy: [{ createdAt: "desc" }],
     });
 
     const users = (
