@@ -1,15 +1,12 @@
-import { createServerSideHelpers } from "@trpc/react-query/server";
 import Head from "next/head";
-import { db } from "~/server/db";
 
 import { api } from "~/utils/api";
-import { appRouter } from "~/server/api/root";
-import superjson from "superjson";
 import type { GetStaticProps, NextPage } from "next";
 import Layout from "~/components/Layout";
 import Image from "next/image";
 import LoadSpinner from "~/components/LoadSpinner";
 import { PostItem } from "~/components/PostItem";
+import { ServersideHelper } from "~/server/helpers/serversideHelper";
 
 const ProfilePosts = ({ userId }: { userId: string }) => {
   const { data, isLoading: isPostLoading } = api.post.getPostsByUserId.useQuery(
@@ -67,11 +64,7 @@ const ProfilePage: NextPage<{ slug: string }> = ({
 export default ProfilePage;
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: { db, userId: null },
-    transformer: superjson,
-  });
+  const helpers = ServersideHelper();
 
   const slug = context.params?.slug;
 
