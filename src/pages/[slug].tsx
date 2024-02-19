@@ -8,6 +8,26 @@ import superjson from "superjson";
 import type { GetStaticProps, NextPage } from "next";
 import Layout from "~/components/Layout";
 import Image from "next/image";
+import LoadSpinner from "~/components/LoadSpinner";
+import { PostItem } from "~/components/PostItem";
+
+const ProfilePosts = ({ userId }: { userId: string }) => {
+  const { data, isLoading: isPostLoading } = api.post.getPostsByUserId.useQuery(
+    { userId },
+  );
+
+  if (isPostLoading) return <LoadSpinner />;
+
+  if (!data || data.length === 0) return <div>User not Posted yet</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data?.map((postData) => (
+        <PostItem {...postData} key={postData.post.id} />
+      ))}
+    </div>
+  );
+};
 
 const ProfilePage: NextPage<{ slug: string }> = ({
   slug,
@@ -38,6 +58,7 @@ const ProfilePage: NextPage<{ slug: string }> = ({
         <div className="h-[64px]"></div>
         <div className="p-4 text-2xl font-bold">{`@${data.username}`}</div>
         <div className="border-b border-slate-400"></div>
+        <ProfilePosts userId={data.id} />
       </Layout>
     </>
   );
