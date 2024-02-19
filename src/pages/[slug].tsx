@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 import { appRouter } from "~/server/api/root";
 import superjson from "superjson";
 import type { GetStaticProps, NextPage } from "next";
+import Layout from "~/components/Layout";
 // import type { RouterOutputs } from "~/utils/api";
 
 const ProfilePage: NextPage<{ slug: string }> = ({
@@ -26,9 +27,9 @@ const ProfilePage: NextPage<{ slug: string }> = ({
       <Head>
         <title>Profile {data.username}</title>
       </Head>
-      <main className="flex min-h-screen justify-center">
+      <Layout>
         <div>Profile Page</div>
-      </main>
+      </Layout>
     </>
   );
 };
